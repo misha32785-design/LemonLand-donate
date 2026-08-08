@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LemonCraft - Донат</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      color: white;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background: linear-gradient(135deg, #f9a825, #ffd54f);
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      text-align: center;
+      color: #1a1a2e;
+    }
+    .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+    .currency-btn {
+      background: #1a1a2e;
+      color: #ffd54f;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1.1em;
+      margin: 10px;
+    }
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin: 30px 0;
+    }
+    .product-card {
+      background: #16213e;
+      border-radius: 15px;
+      padding: 25px;
+      text-align: center;
+      border: 2px solid #f9a825;
+      transition: transform 0.3s;
+    }
+    .product-card:hover { transform: translateY(-5px); }
+    .product-icon {
+      font-size: 3em;
+      color: #f9a825;
+      margin-bottom: 15px;
+    }
+    .product-name {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .product-price {
+      font-size: 1.5em;
+      color: #ffd54f;
+      margin: 10px 0;
+    }
+    .buy-btn {
+      background: #f9a825;
+      color: #1a1a2e;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      margin-top: 10px;
+      font-size: 1em;
+    }
+    .cart {
+      background: #16213e;
+      border-radius: 15px;
+      padding: 25px;
+      margin-top: 30px;
+      border: 2px solid #f9a825;
+    }
+    .cart h2 { color: #ffd54f; margin-bottom: 20px; }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      border-bottom: 1px solid #0f3460;
+    }
+    .cart-total {
+      font-size: 1.5em;
+      color: #ffd54f;
+      text-align: right;
+      margin: 20px 0;
+    }
+    .telegram-section {
+      background: linear-gradient(135deg, #0088cc, #00a8ff);
+      padding: 30px;
+      border-radius: 15px;
+      margin-top: 30px;
+      text-align: center;
+    }
+    .telegram-btn {
+      background: white;
+      color: #0088cc;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 25px;
+      font-size: 1.2em;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      margin: 10px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #16213e;
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 400px;
+      width: 90%;
+      border: 2px solid #f9a825;
+    }
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #f9a825;
+      background: #1a1a2e;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1><i class="fas fa-lemon"></i> LemonCraft Donate</h1>
+      <p>Официальный магазин привилегий сервера</p>
+      <button class="currency-btn" onclick="toggleCurrency()">
+        Валюта: <span id="currencyLabel">RUB ₽</span>
+      </button>
+    </div>
+
+    <div class="products-grid" id="productsGrid"></div>
+
+    <div class="cart">
+      <h2><i class="fas fa-shopping-cart"></i> Корзина</h2>
+      <div id="cartItems"></div>
+      <div class="cart-total">Итого: <span id="totalPrice">0</span> <span id="currencySymbol">₽</span></div>
+      <button class="buy-btn" onclick="openPaymentModal()">Перейти к оплате</button>
+    </div>
+
+    <div class="telegram-section">
+      <h2><i class="fab fa-telegram"></i> Быстрая покупка через Telegram</h2>
+      <p>Оплата в 2 клика через нашего бота</p>
+      <a href="https://t.me/LemonCraftBot" target="_blank" class="telegram-btn">
+        <i class="fab fa-telegram"></i> Открыть бота
+      </a>
+    </div>
+  </div>
+
+  <div class="modal" id="paymentModal">
+    <div class="modal-content">
+      <h2>Оплата заказа</h2>
+      <p>Сумма: <strong><span id="modalAmount">0</span> <span id="modalCurrency">₽</span></strong></p>
+      <input type="text" id="minecraftNick" placeholder="Ваш ник в Minecraft">
+      <button class="buy-btn" onclick="processPayment()">Оплатить через Telegram бота</button>
+      <button class="buy-btn" onclick="closeModal()" style="background:#e74c3c; margin-top:10px;">Отмена</button>
+    </div>
+  </div>
+
+  <script>
+    // Товары
+    const products = [
+      { id: 'unban', name: 'Разбан', priceRUB: 30, icon: 'fa-hammer' },
+      { id: 'vip', name: 'VIP', priceRUB: 5, icon: 'fa-star' },
+      { id: 'lord', name: 'Лорд', priceRUB: 15, icon: 'fa-crown' },
+      { id: 'imperator', name: 'Император', priceRUB: 30, icon: 'fa-chess-king' },
+      { id: 'overlord', name: 'Оверлорд', priceRUB: 100, icon: 'fa-dragon' },
+      { id: 'creator', name: 'Кит создателя', priceRUB: 500, icon: 'fa-gem' }
+    ];
+
+    let currentCurrency = 'RUB';
+    let cart = [];
+    const RUB_TO_BYN = 0.0356;
+
+    function toggleCurrency() {
+      currentCurrency = currentCurrency === 'RUB' ? 'BYN' : 'RUB';
+      document.getElementById('currencyLabel').textContent = currentCurrency === 'RUB' ? 'RUB ₽' : 'BYN Br';
+      document.getElementById('currencySymbol').textContent = currentCurrency === 'RUB' ? '₽' : 'Br';
+      renderProducts();
+      updateCart();
+    }
+
+    function formatPrice(rubPrice) {
+      return currentCurrency === 'RUB' ? rubPrice : (rubPrice * RUB_TO_BYN).toFixed(2);
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById('productsGrid');
+      grid.innerHTML = products.map(p => `
+        <div class="product-card">
+          <div class="product-icon"><i class="fas ${p.icon}"></i></div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-price">${formatPrice(p.priceRUB)} ${currentCurrency === 'RUB' ? '₽' : 'Br'}</div>
+          <button class="buy-btn" onclick="addToCart('${p.id}')">В корзину</button>
+        </div>
+      `).join('');
+    }
+
+    function addToCart(productId) {
+      cart.push(productId);
+      updateCart();
+    }
+
+    function updateCart() {
+      const cartDiv = document.getElementById('cartItems');
+      const grouped = {};
+      cart.forEach(id => grouped[id] = (grouped[id] || 0) + 1);
+      
+      cartDiv.innerHTML = Object.entries(grouped).map(([id, qty]) => {
+        const product = products.find(p => p.id === id);
+        return `
+          <div class="cart-item">
+            <span>${product.name} x${qty}</span>
+            <span>${formatPrice(product.priceRUB * qty)} ${currentCurrency === 'RUB' ? '₽' : 'Br'}</span>
+            <button onclick="removeFromCart('${id}')" style="background:#e74c3c; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">×</button>
+          </div>
+        `;
+      }).join('');
+
+      const total = cart.reduce((sum, id) => sum + products.find(p => p.id === id).priceRUB, 0);
+      document.getElementById('totalPrice').textContent = formatPrice(total);
+    }
+
+    function removeFromCart(productId) {
+      const index = cart.indexOf(productId);
+      if (index > -1) cart.splice(index, 1);
+      updateCart();
+    }
+
+    function openPaymentModal() {
+      if (cart.length === 0) {
+        alert('Добавьте товары в корзину!');
+        return;
+      }
+      const total = cart.reduce((sum, id) => sum + products.find(p => p.id === id).priceRUB, 0);
+      document.getElementById('modalAmount').textContent = formatPrice(total);
+      document.getElementById('modalCurrency').textContent = currentCurrency === 'RUB' ? '₽' : 'Br';
+      document.getElementById('paymentModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('paymentModal').style.display = 'none';
+    }
+
+    function processPayment() {
+      const nick = document.getElementById('minecraftNick').value.trim();
+      if (!nick) {
+        alert('Введите ник в Minecraft!');
+        return;
+      }
+      
+      const total = cart.reduce((sum, id) => sum + products.find(p => p.id === id).priceRUB, 0);
+      const items = cart.map(id => products.find(p => p.id === id).name).join(', ');
+      
+      // Формируем ссылку на бота с предзаполненными данными
+      const botUrl = `https://t.me/Lemon_Land_donate_Bot?start=pay_${nick}_${total}_${encodeURIComponent(items)}`;
+      
+      alert('Сейчас вы будете перенаправлены в Telegram бота для оплаты');
+      window.open(botUrl, '_blank');
+      closeModal();
+    }
+
+    renderProducts();
+  </script>
+</body>
+</html>
